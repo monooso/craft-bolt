@@ -1,0 +1,44 @@
+{
+    "name": "monooso/craft-bolt",
+    "type": "library",
+    "description": "Speed up your Craft test suites.",
+    "homepage": "https://github.com/monooso/craft-bolt",
+    "license": "MIT",
+    "keywords": [
+        "craftcms",
+        "testing"
+    ],
+    "support": {
+        "issues": "https://github.com/monooso/craft-bolt/issues",
+        "source": "https://github.com/monooso/craft-bolt"
+    },
+    "authors": [
+        {
+            "name": "Stephen Lewis",
+            "email": "code@stephenlewis.me",
+            "homepage": "https://www.stephenlewis.me"
+        }
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.2",
+        "codeception/module-yii2": "^1.1",
+        "craftcms/cms": "3.5.17.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Monooso\\Bolt\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Monooso\\Bolt\\Tests\\": "tests/"
+        }
+    }
+}
