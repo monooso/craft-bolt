@@ -1,7 +1,7 @@
 {
     "name": "monooso/craft-bolt",
     "type": "library",
-    "description": "Speed up your Craft test suites.",
+    "description": "Speed up your Craft plugin tests.",
     "homepage": "https://github.com/monooso/craft-bolt",
     "license": "MIT",
     "keywords": [
