@@ -11,34 +11,59 @@ Bolt speeds up your Craft plugin tests. It's opinionated, and a work-in-progress
 Bolt consists of two parts:
 
 1. A Codeception module, which is a thin wrapper around the official `craft\test\Craft` module.
-2. A Codeception extension, which loads a SQL dump of a vanilla Craft install.
+2. A Codeception extension, which loads a SQL dump of your choosing.
 
-The extension relies on the module. The module is pointless unless you're using the extension.
+The extension relies on the module. You can use the module without the extension, but there's no reason to do so.
 
-## Requirements and installation
-@todo: note regarding Codeception 4.
+## Requirements
+Bolt assumes that you're using Codeception 4. It has been tested with Craft 3.5 and PHP 7.4.
 
-Bolt has been tested with with Craft 3.5, and PHP 7.4. Install Bolt using [Composer](https://getcomposer.org/):
+## Installation
+Install Bolt using [Composer](https://getcomposer.org/), as a development dependency:
 
 ```bash
-composer require monooso/craft-bolt
+composer require --dev monooso/craft-bolt
 ```
 
-## Usage
-The basic steps are as follows:
+## Configuration
 
-1. Replace `\craft\test\Craft` in your `codeception.yml` file with `\Monooso\Bolt\BoltModule`.
-2. Tell Craft not to set up the database.
-3. Configure the extension.
+### 1. Replace the Craft Codeception module 
+The Bolt Codeception module is a drop-in replacement for the Craft Codeception module. To use it, simply replace any references to `\craft\test\Craft` in your Codeception configuration files with `\Monooso\Bolt\BoltModule`.
 
-### Configure the extension
+For example:
+
+```yaml
+modules:
+    config:
+        \Monooso\Bolt\BoltModule:
+            configFile: "tests/_craft/config/test.php"
+            # Other config...
+```
+
+Don't forget to update your `*.suite.yml` files as well.
+
+### Step 2: Disable the database setup
+The Bolt extension is responsible for loading a SQL dump, which means we don't need the Craft module to set up the database. Set the configuration options accordingly:
+
+```yaml
+modules:
+    config:
+        \Monooso\Bolt\BoltModule:
+            cleanup: true
+            transaction: true
+            dbSetup: { clean: false, setupCraft: false }
+            fullMock: false
+            # Other config...
+```
+
+### Step 3: Enable and configure the extension
 The extension requires a single configuration setting, specifying the path to the SQL dump to load.
 
 ```yaml
 extensions:
     enabled:
-        - BoltExtension
+        - \Monooso\Bolt\BoltExtension
     config:
-        BoltExtension:
+        \Monooso\Bolt\BoltExtension:
             dump: "tests/_data/dump.sql"
 ```
