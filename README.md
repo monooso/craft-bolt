@@ -57,7 +57,20 @@ modules:
 ```
 
 ### Step 3: Enable and configure the extension
-The extension requires a single configuration setting, specifying the path to the SQL dump to load.
+The extension requires a single configuration setting, specifying the SQL dump(s) to load.
+
+For the sake of convenience, Bolt includes a SQL dump of a vanilla Craft 3.5 site. Use it as follows:
+
+```yaml
+extensions:
+    enabled:
+        - \Monooso\Bolt\BoltExtension
+    config:
+        \Monooso\Bolt\BoltExtension:
+            dump: "bolt:3.5"
+```
+
+You can also choose to load your own SQL dump, by specifying a path relative to the project root:
 
 ```yaml
 extensions:
@@ -66,4 +79,17 @@ extensions:
     config:
         \Monooso\Bolt\BoltExtension:
             dump: "tests/_data/dump.sql"
+```
+
+Finally, you can specify multiple dump files, which will be loaded in the order specified. For example:
+
+```yaml
+extensions:
+    enabled:
+        - \Monooso\Bolt\BoltExtension
+    config:
+        \Monooso\Bolt\BoltExtension:
+            dump:
+                - "bolt:3.5"
+                - "tests/_data/extras.sql"
 ```

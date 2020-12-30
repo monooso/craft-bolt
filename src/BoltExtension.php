@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Monooso\Bolt;
 
+use Codeception\Configuration;
 use Codeception\Events;
+use Codeception\Exception\ModuleConfigException;
 use Codeception\Extension;
 use Craft;
 use craft\db\Connection;
@@ -15,6 +17,8 @@ final class BoltExtension extends Extension
 {
     public static $events = [Events::SUITE_INIT => 'initializeSuite'];
 
+    private array $bundledDumps = ['bolt:3.5' => '35.sql'];
+
     /**
      * Clean and restore the database in preparation for running the test suite
      *
@@ -23,12 +27,42 @@ final class BoltExtension extends Extension
      */
     public function initializeSuite(): void
     {
-        $this->validateConfig($this->config);
+        $config = $this->normalizeConfig($this->config);
+
+        $this->validateConfig($config);
 
         $connection = $this->getDatabaseConnection();
 
         $this->cleanDatabase($connection);
-        $this->restoreDatabase($connection, $this->config['dump']);
+        $this->restoreDatabase($connection, $config['dump']);
+    }
+
+    /**
+     * Normalise the extension config array
+     *
+     * Does not perform any validation.
+     *
+     * @param array $config
+     *
+     * @return array
+     */
+    private function normalizeConfig(array $config): array
+    {
+        $config['dump'] = $this->ensureArray($config['dump']);
+
+        return $config;
+    }
+
+    /**
+     * Ensure that the given value is an array
+     *
+     * @param mixed $value
+     *
+     * @return array
+     */
+    private function ensureArray($value): array
+    {
+        return is_array($value) ? $value : [$value];
     }
 
     /**
@@ -41,9 +75,38 @@ final class BoltExtension extends Extension
      */
     private function validateConfig(array $config): void
     {
-        if (!$config['dump']) {
-            throw new RuntimeException('Missing or invalid `dump` config');
+        foreach ($config['dump'] as $dump) {
+            $this->validateDump($dump);
         }
+    }
+
+    /**
+     * Validate that the specified dump exists
+     */
+    private function validateDump(string $dump): void
+    {
+        if ($this->isBundledDump($dump)) {
+            return;
+        }
+
+        if (!file_exists(Configuration::projectDir() . $dump)) {
+            $message = "\nFile with dump doesn't exist."
+                . "\nPlease check path for SQL file: ${dump}";
+
+            throw new ModuleConfigException(__CLASS__, $message);
+        }
+    }
+
+    /**
+     * Determine if the given string refers to a bundled database dump
+     *
+     * @param string $dump
+     *
+     * @return bool
+     */
+    private function isBundledDump(string $dump): bool
+    {
+        return in_array($dump, array_keys($this->bundledDumps));
     }
 
     /**
@@ -118,12 +181,34 @@ final class BoltExtension extends Extension
      * Restore the database from the specified SQL dump
      *
      * @param Connection $connection
-     * @param string $dump
+     * @param string[] $dumps
      *
      * @return void
      */
-    private function restoreDatabase(Connection $connection, string $dump): void
+    private function restoreDatabase(Connection $connection, array $dumps): void
     {
-        $connection->restore($dump);
+        foreach ($dumps as $dump) {
+            if ($this->isBundledDump($dump)) {
+                $dump = $this->getBundledDumpFilePath($dump);
+            }
+
+            $connection->restore($dump);
+        }
+    }
+
+    /**
+     * Retrieve the full path to the specified bundled dump file
+     *
+     * Does not check whether the given key is valid.
+     *
+     * @param string $key
+     *
+     * @return string
+     */
+    private function getBundledDumpFilePath(string $key): string
+    {
+        $filename = $this->bundledDumps[$key];
+
+        return realpath(dirname(__DIR__) . "/dumps/${filename}");
     }
 }
