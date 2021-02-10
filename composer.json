@@ -27,9 +27,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.2",
+        "php": "^7.2|^8.0",
         "codeception/module-yii2": "^1.1",
-        "craftcms/cms": "3.5.17.1"
+        "craftcms/cms": "^3.5.17.1"
     },
     "autoload": {
         "psr-4": {
